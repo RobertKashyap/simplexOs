@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+*.img
+*.bin
+*.iso
+
+# Other files
+build.sh
