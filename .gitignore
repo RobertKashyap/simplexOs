@@ -36,3 +36,6 @@
 
 # Other files
 build.sh
+*.iml
+*.xml
+
