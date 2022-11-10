@@ -13,6 +13,17 @@ start:
     mov ss, ax ;set the ss register to 0
     mov sp, 0x7C00 ;set the sp register to 0x7C00
 
+TestDiskExtension:
+    mov [DriveId], dl
+    mov ah,0x41
+    mov bx,0x55aa
+    int 0x13 ;call the BIOS interrupt 0x13 to get the disk parameters
+    jc NotSupport ;if the carry flag is set then jump to DiskError
+    cmp bx,0xaa55 ;check if the bx register is 0xaa55
+    jne NotSupport ;if the bx register is not 0xaa55 then jump to DiskError
+
+
+
 ;print requires BIOS services which need to be called by interrupt table where 0x10 is for print function
 ;we need to set parameters for the interrupt function to be called
 PrintMessage:
@@ -24,11 +35,13 @@ PrintMessage:
     mov cx, MessageLength ;set the cx register to the length of the message
     int 0x10 ;call the interrupt function 0x10 to print the message
 
+NotSupport:
 Exit:
     hlt ;halt the CPU
     jmp Exit ;infinite loop
 
-Message: db "Hello" ;the message to be printed
+DriveId: db 0
+Message: db "Disk Extension is supported" ;the message to be printed
 MessageLength: equ $ - Message ;the length of the message
 
 times (0x1be-($-$$)) db 0 ;fill the remaining space with 0 until the partition table starts
