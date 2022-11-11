@@ -13,6 +13,7 @@ start:
     mov ss, ax ;set the ss register to 0
     mov sp, 0x7C00 ;set the sp register to 0x7C00
 
+;disk extension services are verified to write a loader
 TestDiskExtension:
     mov [DriveId], dl
     mov ah,0x41
@@ -22,27 +23,42 @@ TestDiskExtension:
     cmp bx,0xaa55 ;check if the bx register is 0xaa55
     jne NotSupport ;if the bx register is not 0xaa55 then jump to DiskError
 
-
+;load loader to memory
+LoadLoader:
+    mov si,ReadPacket; si now holds address of ReadPacket
+    mov word[si],0x10;size = 16 bytes
+    mov word[si+2],5; 5 sectors to read
+    mov word[si+4],0x7e00; read to 0x7e00 (offset)
+    mov word[si+6],0; read to 0x0000 (segment)
+    mov dword[si+8],1
+    mov dword[si+0xc],0
+    mov dl,[DriveId] ;get the drive id
+    mov ah,0x42 ;lba mode read from hard disk
+    int 0x13 ;call the BIOS interrupt 0x13 to read the sectors
+    jc ReadError ;if the carry flag is set then jump to ReadError
+    mov dl,[DriveId]
+    jmp 0x7e00 ;jump to the loader addess(we will add binary from loader.asm at this address)
 
 ;print requires BIOS services which need to be called by interrupt table where 0x10 is for print function
 ;we need to set parameters for the interrupt function to be called
-PrintMessage:
+NotSupport:
+ReadError:
     mov ah, 0x13 ;string printing mode
     mov al, 1 ;print one character at a time from end of cursor
     mov bx, 0xa ;set the color to green and page to 0
     xor dx, dx ;clear the dx register to 0 hence rows and columns are 0
     mov bp, Message ;set the bp register to the address of the message
-    mov cx, MessageLength ;set the cx register to the length of the message
+    mov cx, MessageLen ;set the cx register to the length of the message
     int 0x10 ;call the interrupt function 0x10 to print the message
 
-NotSupport:
-Exit:
+End:
     hlt ;halt the CPU
-    jmp Exit ;infinite loop
+    jmp End ;infinite loop
 
-DriveId: db 0
-Message: db "Disk Extension is supported" ;the message to be printed
-MessageLength: equ $ - Message ;the length of the message
+DriveId: db 0 ;drive id
+Message: db "Error occured in boot process" ;the message to be printed
+MessageLen: equ $ - Message ;the length of the message
+ReadPacket: times 16 db 0 ;parameter structure for loader service = 16bytes size
 
 times (0x1be-($-$$)) db 0 ;fill the remaining space with 0 until the partition table starts
 db 0x80 ;bootable flag
