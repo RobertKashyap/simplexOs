@@ -29,7 +29,26 @@ LoadKernel:
     int 0x13 ;call the BIOS interrupt 0x13 to read the sectors
     jc ReadError ;if the carry flag is set then jump to ReadError
 
+GetMemInfoStart:
+    mov eax,0xe820
+    mov edx,0x534d4150
+    mov ecx,20
+    mov edi,0x9000
+    xor ebx,ebx
+    int 0x15
+    jc NotSupport
 
+GetMemInfo:
+    add edi,20
+    mov eax,0xe820
+    mov edx,0x534d4150
+    mov ecx,20
+    int 0x15
+    jc GetMemDone
+    test ebx,ebx
+    jnz GetMemInfo
+
+GetMemDone:
     mov ah, 0x13 ;string printing mode
     mov al, 1 ;print one character at a time from end of cursor
     mov bx, 0xa ;set the color to green and page to 0
@@ -45,6 +64,6 @@ End:
     jmp End
 
 DriveId: db 0
-Message: db "Kernel is loaded" ;loader prompt
+Message: db "Get memory info done" ;loader prompt
 MessageLen: equ $-Message ;calculate the length of the message
 ReadPacket: times 16 db 0
