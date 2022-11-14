@@ -16,6 +16,20 @@ start:
     test edx, (1<<26);check 1GB pages
     jz NotSupport
 
+LoadKernel:
+    mov si,ReadPacket; si now holds address of ReadPacket
+    mov word[si],0x10;size = 16 bytes
+    mov word[si+2],100; 100 sectors to read
+    mov word[si+4],0; (offset)
+    mov word[si+6],0x1000;(segment)
+    mov dword[si+8],6 ;7th sector
+    mov dword[si+0xc],0
+    mov dl,[DriveId] ;get the drive id
+    mov ah,0x42 ;lba mode read from hard disk
+    int 0x13 ;call the BIOS interrupt 0x13 to read the sectors
+    jc ReadError ;if the carry flag is set then jump to ReadError
+
+
     mov ah, 0x13 ;string printing mode
     mov al, 1 ;print one character at a time from end of cursor
     mov bx, 0xa ;set the color to green and page to 0
@@ -24,11 +38,13 @@ start:
     mov cx, MessageLen ;set the cx register to the length of the message
     int 0x10 ;call the interrupt function 0x10 to print the message
 
+ReadError:
 NotSupport:
 End:
     hlt
     jmp End
 
 DriveId: db 0
-Message: db "Long mode is supported" ;loader prompt
+Message: db "Kernel is loaded" ;loader prompt
 MessageLen: equ $-Message ;calculate the length of the message
+ReadPacket: times 16 db 0
