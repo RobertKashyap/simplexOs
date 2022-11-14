@@ -64,13 +64,24 @@ TestA20:
 SetA20LineDone:
     xor ax,ax
     mov es,ax
-    mov ah, 0x13 ;string printing mode
-    mov al, 1 ;print one character at a time from end of cursor
-    mov bx, 0xa ;set the color to green and page to 0
-    xor dx, dx ;clear the dx register to 0 hence rows and columns are 0
-    mov bp, Message ;set the bp register to the address of the message
-    mov cx, MessageLen ;set the cx register to the length of the message
-    int 0x10 ;call the interrupt function 0x10 to print the message
+
+SetVideoMode:;video mode is text mode here to skip bios service for string printing
+    mov ax,3
+    int 0x10
+
+    mov si,Message
+    mov ax,0xb800
+    mov es,ax
+    xor di,di
+    mov cx,MessageLen
+
+PrintMessage:
+    mov al,[si]
+    mov [es:di],al
+    mov byte[es:di+1],0xa;bright green color, the fun is in green
+    add di,2;move to next character
+    add si,1
+    loop PrintMessage; cx is counter, if cx is not zero then loop at message length
 
 ReadError:
 NotSupport:
@@ -79,6 +90,6 @@ End:
     jmp End
 
 DriveId: db 0
-Message: db "a20 line is enabled" ;loader prompt
+Message: db "Text mode is set" ;loader prompt
 MessageLen: equ $-Message ;calculate the length of the message
 ReadPacket: times 16 db 0
