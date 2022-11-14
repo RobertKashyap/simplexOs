@@ -49,6 +49,21 @@ GetMemInfo:
     jnz GetMemInfo
 
 GetMemDone:
+
+
+TestA20:
+    mov ax,0xffff
+    mov es,ax
+    mov word[ds:0x7c00],0xa200
+    cmp word[es:0x7c10],0xa200
+    jne SetA20LineDone
+    mov word[0x7c00],0xb200
+    mov word[es:0x7c10],0xb200
+    je End
+
+SetA20LineDone:
+    xor ax,ax
+    mov es,ax
     mov ah, 0x13 ;string printing mode
     mov al, 1 ;print one character at a time from end of cursor
     mov bx, 0xa ;set the color to green and page to 0
@@ -64,6 +79,6 @@ End:
     jmp End
 
 DriveId: db 0
-Message: db "Get memory info done" ;loader prompt
+Message: db "a20 line is enabled" ;loader prompt
 MessageLen: equ $-Message ;calculate the length of the message
 ReadPacket: times 16 db 0
