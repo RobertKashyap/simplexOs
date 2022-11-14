@@ -41,14 +41,14 @@ LoadLoader:
 
 ;print requires BIOS services which need to be called by interrupt table where 0x10 is for print function
 ;we need to set parameters for the interrupt function to be called
-NotSupport:
 ReadError:
-    mov ah, 0x13 ;string printing mode
-    mov al, 1 ;print one character at a time from end of cursor
-    mov bx, 0xa ;set the color to green and page to 0
-    xor dx, dx ;clear the dx register to 0 hence rows and columns are 0
-    mov bp, Message ;set the bp register to the address of the message
-    mov cx, MessageLen ;set the cx register to the length of the message
+NotSupport:
+    mov ah,0x13 ;string printing mode
+    mov al,1 ;print one character at a time from end of cursor
+    mov bx,0xa ;set the color to green and page to 0
+    xor dx,dx ;clear the dx register to 0 hence rows and columns are 0
+    mov bp,Message ;set the bp register to the address of the message
+    mov cx,MessageLen ;set the cx register to the length of the message
     int 0x10 ;call the interrupt function 0x10 to print the message
 
 End:
@@ -57,17 +57,18 @@ End:
 
 DriveId: db 0 ;drive id
 Message: db "Error occured in boot process" ;the message to be printed
-MessageLen: equ $ - Message ;the length of the message
+MessageLen: equ $-Message ;the length of the message
 ReadPacket: times 16 db 0 ;parameter structure for loader service = 16bytes size
 
 times (0x1be-($-$$)) db 0 ;fill the remaining space with 0 until the partition table starts
-db 0x80 ;bootable flag
-db 0,2,0 ;starting head, sector and cylinder
-db 0x0f0 ;partition type
-db 0xff,0xff,0xff ;ending head, sector and cylinder
-dd 1 ;starting sector of the partition(sector 1)
-dd (20*16*63-1) ;size of the partition in sectors
+    db 0x80 ;bootable flag
+    db 0,2,0 ;starting head, sector and cylinder
+    db 0x0f0 ;partition type
+    db 0xff,0xff,0xff ;ending head, sector and cylinder
+    dd 1 ;starting sector of the partition(sector 1)
+    dd (20*16*63-1) ;size of the partition in sectors
 
-times (16*3) db 0 ;fill the remaining space with 0 until the boot signature starts
+    times (16*3) db 0 ;fill the remaining space with 0 until the boot signature starts
 
-dw 0xaa55 ;boot signature
+    db 0x55 ;boot signature
+    db 0xaa ;boot signature
