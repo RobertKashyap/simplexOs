@@ -179,4 +179,4 @@ Gdt64:
 Gdt64Len: equ $-Gdt64
 
 Gdt64Ptr: dw Gdt64Len-1
-          dq Gdt64
+          dd Gdt64
