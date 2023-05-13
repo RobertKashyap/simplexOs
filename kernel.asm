@@ -23,6 +23,20 @@ start:
     lgdt [Gdt64Ptr]
     lidt [IdtPtr]
 
+SetTss:
+    mov rax,Tss
+    mov [TssDesc+2],ax
+    shr rax,16
+    mov [TssDesc+4],al
+    shr rax,8
+    mov [TssDesc+7],al
+    shr rax,8
+    mov [TssDesc+8],eax
+
+    mov ax,0x20
+    ltr ax
+
+
     push 8
     push KernelEntry
     db 0x48
@@ -65,9 +79,11 @@ InitPIC:
     mov al,11111111b
     out 0xa1,al
 
+    ;sti
+
     push 0x18|3
     push 0x7c00
-    push 0x2
+    push 0x202
     push 0x10|3
     push UserEntry
     iretq
@@ -173,6 +189,15 @@ Gdt64:
     dq 0x0020980000000000
     dq 0x0020f80000000000
     dq 0x0000f20000000000
+TssDesc:
+    dw TssLen-1
+    dw 0
+    db 0
+    db 0x89
+    db 0
+    db 0
+    dq 0
+
 
 Gdt64Len: equ $-Gdt64
 
@@ -196,3 +221,11 @@ IdtLen: equ $-Idt
 
 IdtPtr: dw IdtLen-1
         dq Idt
+
+Tss:
+    dd 0
+    dq 0x150000
+    times 88 db 0
+    dd TssLen
+
+TssLen: equ $-Tss
