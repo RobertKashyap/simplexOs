@@ -59,7 +59,7 @@ TestA20:
     mov word[0x7c00],0xb200
     cmp word[es:0x7c10],0xb200
     je End
-
+    
 
 SetA20LineDone:
     xor ax,ax
@@ -68,7 +68,7 @@ SetA20LineDone:
 SetVideoMode:
     mov ax,3
     int 0x10
-
+    
     cli
     lgdt [Gdt32Ptr]
     lidt [Idt32Ptr]
@@ -99,7 +99,7 @@ PMEntry:
     xor eax,eax
     mov ecx,0x10000/4
     rep stosd
-
+    
     mov dword[0x70000],0x71007
     mov dword[0x71000],10000111b
 
@@ -139,12 +139,12 @@ LMEntry:
     rep movsq
 
     jmp 0x200000
-
+    
 LEnd:
     hlt
     jmp LEnd
-
-
+    
+    
 
 DriveId:    db 0
 ReadPacket: times 16 db 0
@@ -165,7 +165,7 @@ Data32:
     db 0x92
     db 0xcf
     db 0
-
+    
 Gdt32Len: equ $-Gdt32
 
 Gdt32Ptr: dw Gdt32Len-1

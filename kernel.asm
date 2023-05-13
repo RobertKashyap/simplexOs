@@ -1,6 +1,6 @@
 [BITS 64]
-[ORG 0X200000]
-; sample kernel to test loading in long mode
+[ORG 0x200000]
+
 start:
     mov rdi,Idt
     mov rax,Handler0
@@ -11,7 +11,6 @@ start:
     shr rax,16
     mov [rdi+8],eax
 
-    ;triggering timer exception
     mov rax,Timer
     add rdi,32*16
     mov [rdi],ax
@@ -30,10 +29,10 @@ start:
     retf
 
 KernelEntry:
-    mov byte[0xb8000], 'K'
-    mov byte[0xb8001], 0xa
+    mov byte[0xb8000],'K'
+    mov byte[0xb8001],0xa
 
-InitPIT:; programming the timer
+InitPIT:
     mov al,(1<<2)|(3<<4)
     out 0x43,al
 
@@ -42,7 +41,7 @@ InitPIT:; programming the timer
     mov al,ah
     out 0x40,al
 
-InitPIC:; programming the counter to sync to timer
+InitPIC:
     mov al,0x11
     out 0x20,al
     out 0xa0,al
@@ -77,24 +76,23 @@ End:
     hlt
     jmp End
 
-UserEntry: ; ring 3 jump
+UserEntry:
     mov ax,cs
     and al,11b
     cmp al,3
     jne UEnd
 
-    mov byte[0xb8010], 'U'
-    mov byte[0xb8011], 0xE
+    mov byte[0xb8010],'U'
+    mov byte[0xb8011],0xE
 
 UEnd:
     jmp UEnd
 
-
-Handler0:; divide by zero handler
+Handler0:
     push rax
-    push rbx
+    push rbx  
     push rcx
-    push rdx
+    push rdx  	  
     push rsi
     push rdi
     push rbp
@@ -106,7 +104,7 @@ Handler0:; divide by zero handler
     push r13
     push r14
     push r15
-
+    
     mov byte[0xb8000],'D'
     mov byte[0xb8001],0xc
 
@@ -122,7 +120,7 @@ Handler0:; divide by zero handler
     pop	r8
     pop	rbp
     pop	rdi
-    pop	rsi
+    pop	rsi  
     pop	rdx
     pop	rcx
     pop	rbx
@@ -132,9 +130,9 @@ Handler0:; divide by zero handler
 
 Timer:
     push rax
-    push rbx
+    push rbx  
     push rcx
-    push rdx
+    push rdx  	  
     push rsi
     push rdi
     push rbp
@@ -150,7 +148,7 @@ Timer:
     mov byte[0xb8020],'T'
     mov byte[0xb8021],0xe
     jmp End
-
+   
 
     pop	r15
     pop	r14
@@ -162,7 +160,7 @@ Timer:
     pop	r8
     pop	rbp
     pop	rdi
-    pop	rsi
+    pop	rsi  
     pop	rdx
     pop	rcx
     pop	rbx
