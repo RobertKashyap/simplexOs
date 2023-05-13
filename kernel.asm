@@ -3,7 +3,7 @@
 ; sample kernel to test loading in long mode
 start:
     mov rdi,Idt
-    mov rax,handler0
+    mov rax,Handler0
 
     mov [rdi],ax
     shr rax,16
@@ -19,7 +19,6 @@ start:
     mov [rdi+6],ax
     shr rax,16
     mov [rdi+8],eax
-
 
 
     lgdt [Gdt64Ptr]
@@ -67,8 +66,6 @@ InitPIC:; programming the counter to sync to timer
     mov al,11111111b
     out 0xa1,al
 
-    ;sti
-
     push 0x18|3
     push 0x7c00
     push 0x2
@@ -93,7 +90,7 @@ UEnd:
     jmp UEnd
 
 
-handler0:; divide by zero handler
+Handler0:; divide by zero handler
     push rax
     push rbx
     push rcx
@@ -110,8 +107,8 @@ handler0:; divide by zero handler
     push r14
     push r15
 
-    mov byte[0xb8000], 'D'
-    mov byte[0xb8001], 0xc
+    mov byte[0xb8000],'D'
+    mov byte[0xb8001],0xc
 
     jmp End
 
@@ -150,10 +147,10 @@ Timer:
     push r14
     push r15
 
-    mov byte[0xb8010], 'T'
-    mov byte[0xb8011], 0xe
-
+    mov byte[0xb8020],'T'
+    mov byte[0xb8021],0xe
     jmp End
+
 
     pop	r15
     pop	r14
@@ -170,6 +167,9 @@ Timer:
     pop	rcx
     pop	rbx
     pop	rax
+
+    iretq
+
 Gdt64:
     dq 0
     dq 0x0020980000000000
@@ -178,8 +178,10 @@ Gdt64:
 
 Gdt64Len: equ $-Gdt64
 
+
 Gdt64Ptr: dw Gdt64Len-1
           dq Gdt64
+
 
 Idt:
     %rep 256
@@ -193,5 +195,6 @@ Idt:
     %endrep
 
 IdtLen: equ $-Idt
+
 IdtPtr: dw IdtLen-1
         dq Idt

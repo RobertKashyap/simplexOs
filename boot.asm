@@ -61,10 +61,10 @@ MessageLen: equ $-Message ;the length of the message
 ReadPacket: times 16 db 0 ;parameter structure for loader service = 16bytes size
 
 times (0x1be-($-$$)) db 0 ;fill the remaining space with 0 until the partition table starts
-    db 0x80 ;bootable flag
+    db 80h ;bootable flag
     db 0,2,0 ;starting head, sector and cylinder
-    db 0x0f0 ;partition type
-    db 0xff,0xff,0xff ;ending head, sector and cylinder
+    db 0f0h ;partition type
+    db 0ffh,0ffh,0ffh ;ending head, sector and cylinder
     dd 1 ;starting sector of the partition(sector 1)
     dd (20*16*63-1) ;size of the partition in sectors
 
