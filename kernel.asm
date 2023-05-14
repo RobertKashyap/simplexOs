@@ -84,13 +84,10 @@ InitPIC:
     db 0x48
     retf
 
-KernelEntry: 
-    xor ax,ax
-    mov ss,ax
-    
+KernelEntry:
     mov rsp,0x200000
     call KMain
-    sti
+    
 End:
     hlt
     jmp End
