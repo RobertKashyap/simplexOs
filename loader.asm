@@ -51,6 +51,7 @@ GetMemInfo:
     int 0x15
     jnc GetMemInfo
 
+
 GetMemDone:
 TestA20:
     mov ax,0xffff
@@ -104,9 +105,9 @@ PMEntry:
     mov dword[0x70000],0x71003
     mov dword[0x71000],10000011b
 
-    mov eax,(0xffff800000000000 >> 39)
+    mov eax,(0xffff800000000000>>39)
     and eax,0x1ff
-    mov dword[0x70000 + eax*8],0x72003
+    mov dword[0x70000+eax*8],0x72003
     mov dword[0x72000],10000011b
 
     lgdt [Gdt64Ptr]
