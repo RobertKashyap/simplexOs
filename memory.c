@@ -177,3 +177,67 @@ void init_kvm(void)
     switch_vm(page_map);
     printk("memory manager is working now");
 }
+
+void free_pages(uint64_t map, uint64_t vstart, uint64_t vend)
+{
+    unsigned int index; 
+
+    ASSERT(vstart % PAGE_SIZE == 0);
+    ASSERT(vend % PAGE_SIZE == 0);
+
+    do {
+        PD pd = find_pdpt_entry(map, vstart, 0, 0);
+
+        if (pd != NULL) {
+            index = (vstart >> 21) & 0x1FF;
+            ASSERT(pd[index] & PTE_P);           
+            kfree(P2V(PTE_ADDR(pd[index])));
+            pd[index] = 0;
+        }
+
+        vstart += PAGE_SIZE;
+    } while (vstart+PAGE_SIZE <= vend);
+}
+
+static void free_pdt(uint64_t map)
+{
+    PDPTR *map_entry = (PDPTR*)map;
+
+    for (int i = 0; i < 512; i++) {
+        if ((uint64_t)map_entry[i] & PTE_P) {            
+            PD *pdptr = (PD*)P2V(PDE_ADDR(map_entry[i]));
+            
+            for (int j = 0; j < 512; j++) {
+                if ((uint64_t)pdptr[j] & PTE_P) {
+                    kfree(P2V(PDE_ADDR(pdptr[j])));
+                    pdptr[j] = 0;
+                }
+            }
+        }
+    }
+}
+
+static void free_pdpt(uint64_t map)
+{
+    PDPTR *map_entry = (PDPTR*)map;
+
+    for (int i = 0; i < 512; i++) {
+        if ((uint64_t)map_entry[i] & PTE_P) {          
+            kfree(P2V(PDE_ADDR(map_entry[i])));
+            map_entry[i] = 0;
+        }
+    }
+}
+
+static void free_pml4t(uint64_t map)
+{
+    kfree(map);
+}
+
+void free_vm(uint64_t map)
+{   
+    //free_pages(map,vstart,vend);
+    free_pdt(map);
+    free_pdpt(map);
+    free_pml4t(map);
+}
