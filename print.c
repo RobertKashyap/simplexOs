@@ -75,8 +75,8 @@ static void write_screen(const char *buffer, int size, struct ScreenBuffer *sb, 
 
     for (int i = 0; i < size; i++) {       
         if (row >= 25) {
-            memcpy(sb->buffer,sb->buffer+LINE_SIZE,LINE_SIZE*24);
-            memset(sb->buffer+LINE_SIZE*24,0,LINE_SIZE);
+            memcpy(sb->buffer, sb->buffer+LINE_SIZE, LINE_SIZE*24);
+            memset(sb->buffer+LINE_SIZE*24, 0, LINE_SIZE);
             row--;
         }
         
