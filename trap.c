@@ -1,6 +1,8 @@
 #include "trap.h"
 #include "print.h"
 #include "syscall.h"
+#include "process.h"
+#include "debug.h"
 
 static struct IdtPtr idt_pointer;
 static struct IdtEntry vectors[256];
@@ -48,7 +50,7 @@ void handler(struct TrapFrame *tf)
     unsigned char isr_value;
 
     switch (tf->trapno) {
-        case 32:
+        case 32:  
             eoi();
             break;
             
@@ -58,11 +60,17 @@ void handler(struct TrapFrame *tf)
                 eoi();
             }
             break;
-        case 0x80:
+
+        case 0x80:                   
             system_call(tf);
             break;
+
         default:
-            printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3), tf->errorcode, read_cr2(), tf->rip);
+            //printk("[Error %d at ring %d] %d:%x %x", tf->trapno, (tf->cs & 3), tf->errorcode, read_cr2(), tf->rip);
             while (1) { }
+    }
+
+    if (tf->trapno == 32) {       
+        yield();
     }
 }

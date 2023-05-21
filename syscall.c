@@ -7,7 +7,7 @@ static SYSTEMCALL system_calls[10];
 
 static int sys_write(int64_t *argptr)
 {    
-    write_screen((char*)argptr[0], (int)argptr[1],0xe);  
+    write_screen((char*)argptr[0], (int)argptr[1], 0xe);  
     return (int)argptr[1];
 }
 
